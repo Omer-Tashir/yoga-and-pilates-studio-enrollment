@@ -1,0 +1,30 @@
+.home {
+    margin: 0 5vw;
+    padding-top: calc(var(--toolbar-height) + 30px);
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 5vw;
+    
+    &__daily-classes {
+    }
+
+    &__daily-classes-header {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    &__daily-classes-body {
+    }
+
+    &__daily-classes-title {
+
+    }
+
+    &__daily-classes-add-btn {
+
+    }
+
+    &__daily-classes-class {
+        
+    }
+}

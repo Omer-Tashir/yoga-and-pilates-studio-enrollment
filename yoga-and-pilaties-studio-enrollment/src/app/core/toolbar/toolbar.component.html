@@ -1,0 +1,28 @@
+<mat-toolbar>
+    <div class="navbar">
+      <div class="login">
+        <ng-container *ngIf="!!loggedIn">
+          <span *ngIf="!!image" class="image">
+            <img [ngClass]="{'hidden': !photoLoaded}" [attr.src]="image" width="45" height="45"
+              (load)="photoLoaded = true">
+          </span>
+          <span *ngIf="!!displayName" class="display-name">{{ displayName }}</span> |
+          <span class="logout" (click)="logout()">התנתק</span>
+        </ng-container>
+
+        <ng-container *ngIf="!loggedIn">
+          <a class="nav-link" [routerLink]="'/login'">כניסה למשתמש קיים</a>
+          <mat-icon>account_box</mat-icon>
+        </ng-container>
+      </div>
+
+      <div class="navbar-links">
+        <ul>
+          <li>
+            <a [routerLink]="'/home'">ראשי</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+</mat-toolbar>

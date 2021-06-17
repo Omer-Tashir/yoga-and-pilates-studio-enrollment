@@ -1,0 +1,27 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" autocomplete="off" novalidate fxLayout="column wrap"
+    fxLayoutAlign="center center" fxLayoutGap="10px">
+
+      <div class="type">
+        <span>יוגה</span><mat-slide-toggle formControlName="type">פילאטיס</mat-slide-toggle>
+      </div>
+
+      <mat-form-field>
+        <mat-select placeholder="אולם" formControlName="auditorium">
+          <mat-option *ngFor="let auditorium of (auditoriums$ | async) | sort:'name'" [value]="auditorium.uid">{{auditorium.name}}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="hasError('auditorium', 'required')">חובה לבחור אולם</mat-error>
+      </mat-form-field>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">
+    <ng-container>בטל</ng-container>
+  </button>
+  <button mat-button [matDialogClose]="form.value" [disabled]="!form.valid" color="primary">
+    <ng-container>שמור</ng-container>
+  </button>
+</mat-dialog-actions>

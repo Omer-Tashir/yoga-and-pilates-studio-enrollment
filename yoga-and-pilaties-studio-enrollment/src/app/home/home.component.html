@@ -1,0 +1,21 @@
+<app-toolbar></app-toolbar>
+
+<div class="home">
+    <div class="home__daily-classes">
+        <div class="home__daily-classes-header">
+            <h2 class="home__daily-classes-title">לוח חוגים יומי - {{calendarActiveDate | dateFormat}}:</h2>
+        
+            <button mat-fab class="home__daily-classes-add-btn" (click)="addClass()">
+                <mat-icon>add</mat-icon>
+            </button>
+        </div>
+
+        <div class="home__daily-classes-body">
+            <div class="home__daily-classes-class" *ngFor="let class of (dailyClasses$ | async)">
+                {{class.uid}}
+            </div>
+        </div>
+    </div>
+
+    <app-calendar (dateChanged)="dateChanged($event)"></app-calendar>
+</div>

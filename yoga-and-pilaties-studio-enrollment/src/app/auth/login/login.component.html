@@ -1,0 +1,47 @@
+<div class="login-page">
+  <div class="login-container" [@fadeInOnEnter]>
+    <div class="login-title-container">
+      <img [src]="logo" class="logo" [routerLink]="'/home'" />
+    </div>
+
+    <form [formGroup]="formGroup" class="login-form" autocomplete="off">
+      <mat-form-field>
+        <span class="prefix" matPrefix>
+          <mat-icon>email</mat-icon>
+        </span>
+        <mat-label class="email">אימייל</mat-label>
+        <input
+          matInput
+          formControlName="email"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </mat-form-field>
+
+      <mat-form-field>
+        <span class="prefix" matPrefix>
+          <mat-icon>password</mat-icon>
+        </span>
+        <mat-label class="password">סיסמא</mat-label>
+        <input
+          matInput
+          type="password"
+          formControlName="password"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </mat-form-field>
+
+      <div class="form-footer">
+        <button
+          mat-raised-button
+          (click)="submit()"
+          color="primary"
+          [disabled]="!formGroup.valid"
+        >
+          התחבר
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
