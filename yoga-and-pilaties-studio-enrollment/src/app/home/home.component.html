@@ -5,14 +5,56 @@
         <div class="home__daily-classes-header">
             <h2 class="home__daily-classes-title">לוח חוגים יומי - {{calendarActiveDate | dateFormat}}:</h2>
         
-            <button mat-fab class="home__daily-classes-add-btn" (click)="addClass()">
+            <button mat-fab class="home__daily-classes-add-btn" (click)="addClass()" matTooltip="הוספת שיעור חדש">
                 <mat-icon>add</mat-icon>
             </button>
         </div>
 
         <div class="home__daily-classes-body">
-            <div class="home__daily-classes-class" *ngFor="let class of (dailyClasses$ | async)">
-                {{class.uid}}
+            <div class="home__daily-classes-class" *ngFor="let class of dailyClasses | sort:'hour'">
+                <div class="home__daily-classes-class-row">
+                    <p class="home__daily-classes-class--type">{{class.type}}</p>
+                    <p class="home__daily-classes-class--auditorium">
+                        <ng-container *ngIf="(getAuditorium(class)) as auditorium">
+                            {{auditorium.name}} <span class="home__daily-classes-class--auditorium--capacity">(מוגבל עד {{auditorium.capacity}} איש)</span>
+                        </ng-container>
+                    </p>
+                    <p class="home__daily-classes-class--hour">שעה: {{class.hour}}:00</p>
+                    <p class="home__daily-classes-class--participents">משתתפים: {{class.participents?.length || 0}}</p>
+                    <p class="home__daily-classes-class--waiting-list">רשימת המתנה: {{class.waitingList?.length || 0}}</p>
+                </div>
+
+                <div class="home__daily-classes-class-row home__daily-classes-class-row--white">
+                    <p class="home__daily-classes-class--type"></p>
+                    <p class="home__daily-classes-class--auditorium"></p>
+                    <p class="home__daily-classes-class--hour"></p>
+                    <div class="home__daily-classes-class--participents">
+                        <p *ngFor="let participent of getParticipents(class)">
+                            {{participent.name}}
+                        </p>
+                    </div>
+                    <div class="home__daily-classes-class--waiting-list">
+                        <p *ngFor="let participent of getWaitingList(class)">
+                            {{participent.name}}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="home__daily-classes-class-row home__daily-classes-class-row--white home__daily-classes-class-row--actions">
+                    <p class="home__daily-classes-class--type"></p>
+                    <p class="home__daily-classes-class--auditorium"></p>
+                    <p class="home__daily-classes-class--hour"></p>
+                    <div class="home__daily-classes-class--participents">
+                        <button mat-fab class="home__daily-classes-class--add-btn" (click)="addParticipent(class)" matTooltip="רישום משתתף">
+                            <mat-icon>add</mat-icon>
+                        </button>
+                    </div>
+                    <div class="home__daily-classes-class--waiting-list">
+                        <button mat-fab class="home__daily-classes-class--add-btn" (click)="addWaitingList(class)" matTooltip="רישום משתתף לרשימת הממתנה">
+                            <mat-icon>add</mat-icon>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

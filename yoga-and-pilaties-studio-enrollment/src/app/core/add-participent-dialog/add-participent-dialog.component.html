@@ -1,0 +1,23 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" autocomplete="off" novalidate fxLayout="column wrap"
+    fxLayoutAlign="center center" fxLayoutGap="10px">
+      
+      <mat-form-field>
+        <mat-select placeholder="בחר מנוי" formControlName="member">
+          <mat-option *ngFor="let member of members" [value]="member.uid">{{member.name}}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="hasError('member', 'required')">חובה לבחור מנוי</mat-error>
+      </mat-form-field>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">
+    <ng-container>בטל</ng-container>
+  </button>
+  <button mat-button [matDialogClose]="form.value" [disabled]="!form.valid" color="primary">
+    <ng-container>שמור</ng-container>
+  </button>
+</mat-dialog-actions>

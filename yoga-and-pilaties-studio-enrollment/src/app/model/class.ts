@@ -6,6 +6,7 @@ export enum ClassType {
 export class Class {
     uid!: string;
     date!: any;
+    hour!: number;
     type!: ClassType;
     auditorium!: string;
     participents!: Array<string>;

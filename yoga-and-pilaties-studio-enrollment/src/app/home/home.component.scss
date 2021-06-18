@@ -11,13 +11,14 @@
     &__daily-classes-header {
         display: flex;
         justify-content: space-between;
+        margin-bottom: 3vh;
     }
 
     &__daily-classes-body {
     }
 
     &__daily-classes-title {
-
+        margin: 0;
     }
 
     &__daily-classes-add-btn {
@@ -25,6 +26,51 @@
     }
 
     &__daily-classes-class {
-        
+
+        &--auditorium {
+
+            &--capacity {
+                font-size: 12px;
+            }
+        }
+
+        &--add-btn {
+            height: 30px;
+            width: 30px;
+
+            &::ng-deep mat-icon {
+                font-size: 16px;
+            }
+        }
+    }
+
+    &__daily-classes-class-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        background: #87c3bf;
+        gap: 15px;
+        margin-bottom: 1vh;
+
+        &--white {
+            background: unset;
+
+            * {
+                color: black !important;
+            }
+        }
+
+        &--actions {
+            margin-bottom: 25px;
+        }
+
+        p {
+            padding: 5px;
+        }
+
+        * {
+            color: white;
+            line-height: 1.5;
+            margin: 0;
+        }
     }
 }

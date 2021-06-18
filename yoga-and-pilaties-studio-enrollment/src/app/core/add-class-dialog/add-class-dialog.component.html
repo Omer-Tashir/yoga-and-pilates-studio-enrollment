@@ -7,10 +7,17 @@
       <div class="type">
         <span>יוגה</span><mat-slide-toggle formControlName="type">פילאטיס</mat-slide-toggle>
       </div>
+      
+      <mat-form-field>
+        <mat-select placeholder="שעת התחלה" formControlName="hour">
+          <mat-option *ngFor="let hour of hours" [value]="hour">{{hour}}:00</mat-option>
+        </mat-select>
+        <mat-error *ngIf="hasError('hour', 'required')">חובה לבחור שעת התחלה</mat-error>
+      </mat-form-field>
 
       <mat-form-field>
         <mat-select placeholder="אולם" formControlName="auditorium">
-          <mat-option *ngFor="let auditorium of (auditoriums$ | async) | sort:'name'" [value]="auditorium.uid">{{auditorium.name}}</mat-option>
+          <mat-option *ngFor="let auditorium of auditoriums | sort:'name'" [value]="auditorium.uid">{{auditorium.name}}</mat-option>
         </mat-select>
         <mat-error *ngIf="hasError('auditorium', 'required')">חובה לבחור אולם</mat-error>
       </mat-form-field>

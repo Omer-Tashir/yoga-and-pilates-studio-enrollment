@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { catchError, map, shareReplay, switchMap, tap } from 'rxjs/operators';
-import { from, Observable, of } from 'rxjs';
+import { catchError, first, map, shareReplay, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { from, Observable, of, Subject } from 'rxjs';
 
 import { SessionStorageService } from './session-storage-service';
 import { Auditorium } from '../model/auditorium';
@@ -14,12 +14,17 @@ import * as moment from 'moment/moment';
   providedIn: 'root',
 })
 export class DatabaseService {
+
   constructor(
     private SessionStorageService: SessionStorageService,
     private db: AngularFirestore
-  ) { }
+  ) { 
+    this.getAuditoriums().pipe(first()).subscribe();
+    this.getClasses().pipe(first()).subscribe();
+    this.getClubMembers().pipe(first()).subscribe();
+  }
 
-  getAuditoriums(): Observable<Auditorium[]> {
+  private getAuditoriums(): Observable<Auditorium[]> {
     if(!this.SessionStorageService.getItem('auditoriums')) {
       return this.db.collection(`auditoriums`).get().pipe(
         map(auditoriums => auditoriums.docs.map(doc => {
@@ -34,7 +39,7 @@ export class DatabaseService {
     }
   }
 
-  getClasses(): Observable<Class[]> {
+  private getClasses(): Observable<Class[]> {
     if(!this.SessionStorageService.getItem('classes')) {
       return this.db.collection(`classes`).get().pipe(
         map(classes => classes.docs.map(doc => {
@@ -52,7 +57,7 @@ export class DatabaseService {
     }
   }
 
-  getClubMembers(): Observable<ClubMember[]> {
+  private getClubMembers(): Observable<ClubMember[]> {
     if(!this.SessionStorageService.getItem('club-members')) {
       return this.db.collection(`club-members`).get().pipe(
         map(clubMembers => clubMembers.docs.map(doc => {
@@ -75,8 +80,13 @@ export class DatabaseService {
     c.uid = uid;
 
     return from(this.db.collection(`classes`).doc(uid).set(c).then(() => {
-      this.SessionStorageService.removeItem('classes');
-    })).pipe(switchMap(() => of(uid)));
+      let classes = JSON.parse(this.SessionStorageService.getItem('classes'));
+      classes.push(c);
+
+      this.SessionStorageService.setItem('classes', JSON.stringify(classes));
+    })).pipe(
+      switchMap(() => of(uid))
+    );
   }
 
   getInstance() {

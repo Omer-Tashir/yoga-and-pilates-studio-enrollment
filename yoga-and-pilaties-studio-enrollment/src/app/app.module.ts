@@ -55,6 +55,7 @@ import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './auth/login/login.component';
 import { CalendarComponent } from './calendar/calendar.component';
 import { AddClassDialogComponent } from './core/add-class-dialog/add-class-dialog.component';
+import { AddParticipentDialogComponent } from './core/add-participent-dialog/add-participent-dialog.component';
 
 export const CUSTOM_DATE_FORMAT = {
   parse: {
@@ -89,6 +90,7 @@ export const CUSTOM_DATE_FORMAT = {
     TimeFormatPipe,
     CalendarComponent,
     AddClassDialogComponent,
+    AddParticipentDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -117,6 +119,7 @@ export const CUSTOM_DATE_FORMAT = {
     NotFoundSnackComponent,
     WarningDialogComponent,
     AddClassDialogComponent,
+    AddParticipentDialogComponent,
   ],
   providers: [
     ArraySortPipe,
