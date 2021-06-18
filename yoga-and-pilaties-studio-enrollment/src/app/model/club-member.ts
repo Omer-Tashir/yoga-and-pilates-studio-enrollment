@@ -1,7 +1,7 @@
 export enum MembershipType {
-    MONTHLY,
-    CARD_OF_5_ENTRANCES,
-    CARD_OF_10_ENTRANCES
+    MONTHLY = 'מנוי חופשי חודשי',
+    CARD_OF_5_ENTRANCES = 'כרטיסייה של 5 כניסות',
+    CARD_OF_10_ENTRANCES = 'כרטיסייה של 10 כניסות'
 }
 
 export class ClubMember {

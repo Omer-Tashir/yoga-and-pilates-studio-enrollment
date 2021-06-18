@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { catchError, first, map, shareReplay, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { from, Observable, of, Subject } from 'rxjs';
+import { forkJoin, from, Observable, of, Subject } from 'rxjs';
 
 import { SessionStorageService } from './session-storage-service';
 import { Auditorium } from '../model/auditorium';
@@ -17,11 +18,18 @@ export class DatabaseService {
 
   constructor(
     private SessionStorageService: SessionStorageService,
-    private db: AngularFirestore
-  ) { 
-    this.getAuditoriums().pipe(first()).subscribe();
-    this.getClasses().pipe(first()).subscribe();
-    this.getClubMembers().pipe(first()).subscribe();
+    private db: AngularFirestore,
+    private http: HttpClient
+  ) { }
+
+  init(): Observable<boolean> {
+    return forkJoin([
+      this.getAuditoriums().pipe(first()),
+      this.getClasses().pipe(first()),
+      this.getClubMembers().pipe(first())
+    ]).pipe(
+      map(results => !!results)
+    );
   }
 
   private getAuditoriums(): Observable<Auditorium[]> {
@@ -45,9 +53,10 @@ export class DatabaseService {
         map(classes => classes.docs.map(doc => {
           const data: any = doc.data();
           let c = Object.assign(data, new Class);
-          c.date = moment(data['date'].toDate()).utc().toDate()
+          c.date = moment(data['date'].toDate()).utc().toDate();
           return c;
         })),
+        tap(classes => console.log(classes)),
         tap(classes => this.SessionStorageService.setItem('classes', JSON.stringify(classes))),
         catchError(err => of([])),
       );
@@ -75,7 +84,7 @@ export class DatabaseService {
     }
   }
 
-  putClass(c: Class): Observable<string> {
+  createClass(c: Class): Observable<string> {
     const uid = this.db.createId();
     c.uid = uid;
 
@@ -89,7 +98,42 @@ export class DatabaseService {
     );
   }
 
-  getInstance() {
-    return this.db;
+  updateClass(c: Class): Observable<string> {
+    c.date = moment(c.date).toDate();
+    return from(this.db.collection(`classes`).doc(c.uid).set(c).then(() => {
+      let classes = JSON.parse(this.SessionStorageService.getItem('classes'));
+      let i = classes.findIndex((cls: Class) => cls.uid === c.uid);
+      if (!!i) {
+        classes[i] = c;
+      }
+
+      this.SessionStorageService.setItem('classes', JSON.stringify(classes));
+    })).pipe(
+      switchMap(() => of(c.uid))
+    );
   }
+
+  createClubMember(member: ClubMember): Observable<string> {
+    const uid = this.db.createId();
+    member.uid = uid;
+
+    return from(this.db.collection(`club-members`).doc(uid).set(member).then(() => {
+      let clubMembers = JSON.parse(this.SessionStorageService.getItem('club-members'));
+      clubMembers.push(member);
+
+      this.SessionStorageService.setItem('club-members', JSON.stringify(clubMembers));
+    })).pipe(
+      switchMap(() => of(uid))
+    );
+  }
+
+  // getCitiesJSON(): Observable<any> {
+  //   let response = this.http.get("./assets/israel-cities.json");
+  //   return response
+  // }
+
+  // getStreetsJSON(): Observable<any> {
+  //   let response = this.http.get("./assets/israel-streets.json");
+  //   return response
+  // }
 }

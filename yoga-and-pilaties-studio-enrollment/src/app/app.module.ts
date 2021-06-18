@@ -56,6 +56,7 @@ import { LoginComponent } from './auth/login/login.component';
 import { CalendarComponent } from './calendar/calendar.component';
 import { AddClassDialogComponent } from './core/add-class-dialog/add-class-dialog.component';
 import { AddParticipentDialogComponent } from './core/add-participent-dialog/add-participent-dialog.component';
+import { ClubMembersComponent } from './club-members/club-members.component';
 
 export const CUSTOM_DATE_FORMAT = {
   parse: {
@@ -91,6 +92,7 @@ export const CUSTOM_DATE_FORMAT = {
     CalendarComponent,
     AddClassDialogComponent,
     AddParticipentDialogComponent,
+    ClubMembersComponent,
   ],
   imports: [
     CommonModule,

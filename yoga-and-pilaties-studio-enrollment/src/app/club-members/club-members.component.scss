@@ -1,0 +1,25 @@
+.main-section {
+    padding-top: calc(var(--toolbar-height) + 30px);
+    margin: 0 5vw;
+}
+
+.sections {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 5vw;
+}
+
+.form-inputs-wrapper {
+    display: flex;
+    justify-content: flex-start;
+    gap: 2vw;
+}
+
+.submit-btn {
+    margin-top: 25px;
+}
+
+.link:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}

@@ -39,7 +39,7 @@ export class HomeComponent implements OnInit {
 
   dateChanged(date: Date) {
     this.calendarActiveDate = date;
-    this.dailyClasses = this.classes.filter(c => moment(c.date).isSame(date, 'day'));
+    this.dailyClasses = this.classes?.filter(c => moment(c.date).isSame(date, 'day')) ?? [];
   }
 
   addClass() {
@@ -60,7 +60,7 @@ export class HomeComponent implements OnInit {
           type: result['type'] === true ? ClassType.PILATES : ClassType.YOGA,
         }, new Class());
 
-        this.db.putClass(newClass).pipe(first()).subscribe(() => {
+        this.db.createClass(newClass).pipe(first()).subscribe(() => {
           this.classes = JSON.parse(this.sessionStorageService.getItem('classes'));
           this.dateChanged(this.calendarActiveDate);
         });
@@ -101,6 +101,11 @@ export class HomeComponent implements OnInit {
     else {
         throw new Error('לא ניתן להוסיף את המנוי לשיעור המבוקש');
     }
+
+    this.db.updateClass(c).pipe(first()).subscribe(() => {
+      this.classes = JSON.parse(this.sessionStorageService.getItem('classes'));
+      this.dateChanged(this.calendarActiveDate);
+    });
   }
 
   private addParticipentToWaitingList(c: Class, participent: string): void {
@@ -126,7 +131,7 @@ export class HomeComponent implements OnInit {
 
     let auditorium: Auditorium | undefined = this.auditoriums.find(a => a.uid === c.auditorium);
     if (auditorium) {
-      return auditorium.capacity < c.participents.length;
+      return auditorium.capacity > c.participents.length;
     }
 
     return false;
@@ -137,11 +142,11 @@ export class HomeComponent implements OnInit {
   }
 
   getParticipents(c: Class): ClubMember[] {
-    return this.members.filter(m => c.participents.includes(m.uid));
+    return this.members.filter(m => c.participents?.includes(m.uid));
   }
 
   getWaitingList(c: Class): ClubMember[] {
-    return this.members.filter(m => c.waitingList.includes(m.uid));
+    return this.members.filter(m => c.waitingList?.includes(m.uid));
   }
 
   ngOnInit(): void {

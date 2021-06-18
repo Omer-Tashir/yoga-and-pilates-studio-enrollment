@@ -1,0 +1,87 @@
+<app-toolbar></app-toolbar>
+
+<div class="main-section">  
+
+    <h1>מנויים</h1>
+
+    <div class="sections">
+      <section class="form">
+        <h2>רשימת מנויים</h2>
+
+        <mat-form-field class="search">
+          <mat-label>חיפוש מנוי</mat-label>
+          <input matInput (keyup)="applyFilter($event)" #input>
+        </mat-form-field>
+      
+        <div class="loading-shade"
+             *ngIf="isLoadingResults || isRateLimitReached">
+          <mat-spinner *ngIf="isLoadingResults"></mat-spinner>
+          <div class="rate-limit-reached" *ngIf="isRateLimitReached">
+            לא נמצאו מנויים
+          </div>
+        </div>
+      
+        <div class="table-container">
+          <table mat-table [dataSource]="dataSource" class="table"
+                 matSort (matSortChange)="sortData($event)" matSortActive="name" 
+                 matSortDisableClear matSortDirection="asc">
+      
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header="name">שם מנוי</th>
+              <td mat-cell *matCellDef="let row">{{row.name}}</td>
+            </ng-container>
+      
+            <ng-container matColumnDef="email">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header="email">אימייל</th>
+              <td mat-cell *matCellDef="let row">{{row.email}}</td>
+            </ng-container>
+      
+            <ng-container matColumnDef="membershipType">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header="membershipType">סוג מנוי</th>
+              <td mat-cell *matCellDef="let row">{{row.membershipType}}</td>
+            </ng-container>
+      
+            <ng-container matColumnDef="memberSince">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header="memberSince">תאריך הצטרפות</th>
+              <td mat-cell *matCellDef="let row">{{row.memberSince | dateFormat}}</td>
+            </ng-container>
+      
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+      
+        <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" [length]="resultsLength" showFirstLastButtons></mat-paginator>
+      </section>
+
+      <section class="form">
+        <h2>הוספת מנוי חדש</h2>
+        <div class="inputs-container">
+          <form [formGroup]="form" autocomplete="new-phone" novalidate
+          fxLayout="column wrap" fxLayoutAlign="center center" fxLayoutGap="10px">
+            <div class="form-inputs-wrapper">
+              <mat-form-field>
+                <input autocomplete="new-phone" matInput type="text" placeholder="שם מלא" formControlName="name">
+                <mat-error *ngIf="hasError('name', 'required')">חובה להזין שם מלא</mat-error>
+              </mat-form-field>
+  
+              <mat-form-field>
+                <input autocomplete="new-phone" matInput type="email" placeholder="אימייל" formControlName="email">
+                <mat-error *ngIf="hasError('email', 'required')">חובה להזין אימייל</mat-error>
+                <mat-error *ngIf="hasError('email', 'email')">כתובת לא תקינה</mat-error>
+              </mat-form-field>
+  
+              <mat-form-field>
+                <mat-select placeholder="סוג מנוי" formControlName="membershipType">
+                  <mat-option *ngFor="let membershipType of membershipTypes | keyvalue" [value]="membershipType.value">{{membershipType.value}}</mat-option>
+                </mat-select>
+                <mat-error *ngIf="hasError('membershipType', 'required')">חובה לבחור סוג מנוי</mat-error>
+              </mat-form-field>
+            </div>
+          </form>
+        </div>
+  
+        <button (click)="submit(form?.value)" class="submit-btn" mat-raised-button color="primary" [disabled]="!form?.valid">צור מנוי</button>
+      </section>
+    </div>
+</div>
