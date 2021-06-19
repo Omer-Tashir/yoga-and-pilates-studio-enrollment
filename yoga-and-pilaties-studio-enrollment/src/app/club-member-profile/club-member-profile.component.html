@@ -1,1 +1,48 @@
-<p>club-member-profile works!</p>
+<app-toolbar></app-toolbar>
+
+<div class="main-section">  
+
+    <h1>פרטי מנוי</h1>
+
+    <section class="form">
+        <div class="inputs-container">
+          <form [formGroup]="form" autocomplete="new-phone" novalidate
+          fxLayout="column wrap" fxLayoutAlign="center center" fxLayoutGap="10px">
+            <div class="form-inputs-wrapper">
+              <mat-form-field>
+                <input autocomplete="new-phone" matInput type="text" placeholder="שם מלא" formControlName="name">
+              </mat-form-field>
+  
+              <mat-form-field>
+                <input autocomplete="new-phone" matInput type="email" placeholder="אימייל" formControlName="email">
+              </mat-form-field>
+  
+              <mat-form-field>
+                <input autocomplete="new-phone" matInput type="text" placeholder="סוג מנוי" formControlName="membershipType">
+              </mat-form-field>
+            </div>
+          </form>
+        </div>
+
+        <ng-container *ngIf="member.membershipType === membershipType.MONTHLY">
+          <p class="expiration">
+              תאריך תפוגת המנוי: {{expiration | dateFormat}}
+          </p>
+        </ng-container>
+
+        <ng-container *ngIf="member.membershipType !== membershipType.MONTHLY">
+          <p class="expiration">
+              כמות הכניסות שנשארו לך: {{entrancesLeft}}
+          </p>
+        </ng-container>
+
+        <button class="renew" (click)="renew()">
+          <span>הארכת המנוי</span>
+        </button>
+  
+      </section>
+</div>
+
+<mat-card *ngIf="isLoading" class="mat-progress-spinner">
+  <mat-progress-spinner color="primary" mode="indeterminate"></mat-progress-spinner>
+</mat-card>

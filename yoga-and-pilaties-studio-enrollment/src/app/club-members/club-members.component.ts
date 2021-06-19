@@ -4,7 +4,7 @@ import { merge, Observable, of } from 'rxjs';
 
 import { DatabaseService } from '../core/database.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { catchError, map, startWith, switchMap } from 'rxjs/operators';
+import { map, startWith, switchMap } from 'rxjs/operators';
 import { AlertService } from '../core/alerts/alert.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort, Sort } from '@angular/material/sort';
@@ -107,8 +107,6 @@ export class ClubMembersComponent implements OnInit, AfterViewInit {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
     this.sortData({ active: 'name', direction: 'asc' });
-
-    console.log(this.dataSource.data);
   }
 
   ngOnInit(): void {

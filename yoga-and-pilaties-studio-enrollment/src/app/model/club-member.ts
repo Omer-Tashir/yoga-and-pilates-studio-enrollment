@@ -10,4 +10,6 @@ export class ClubMember {
     email!: string;
     membershipType!: MembershipType;
     memberSince!: any;
+    expirationDate!: any;
+    entrancesLeft!: number;
 }

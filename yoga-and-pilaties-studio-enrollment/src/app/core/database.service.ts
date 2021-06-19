@@ -6,7 +6,7 @@ import { forkJoin, from, Observable, of } from 'rxjs';
 
 import { SessionStorageService } from './session-storage-service';
 import { Auditorium } from '../model/auditorium';
-import { ClubMember } from '../model/club-member';
+import { ClubMember, MembershipType } from '../model/club-member';
 import { Class } from '../model/class';
 import { Admin } from '../model/admin';
 
@@ -88,7 +88,30 @@ export class DatabaseService {
         map(clubMembers => clubMembers.docs.map(doc => {
           const data: any = doc.data();
           let clubMember = Object.assign(data, new ClubMember);
-          clubMember.memberSince = moment(data['memberSince'].toDate()).toDate()
+          clubMember.memberSince = moment(data['memberSince'].toDate()).toDate();
+
+          if (data['expirationDate']) {
+            clubMember.expirationDate = moment(data['expirationDate'].toDate()).toDate();
+          }
+          else {
+            clubMember.expirationDate = moment(clubMember.memberSince).add(1, 'months').toDate();
+          }
+
+          if (!data['entrancesLeft']) {
+            switch (data['membershipType']) {
+              case MembershipType.CARD_OF_5_ENTRANCES:
+                clubMember.entrancesLeft = 5;
+                break;
+
+              case MembershipType.CARD_OF_10_ENTRANCES:
+                clubMember.entrancesLeft = 10;
+                break;
+
+              default:
+                break;
+            }
+          }
+
           return clubMember;
         })),
         tap(clubMembers => this.SessionStorageService.setItem('club-members', JSON.stringify(clubMembers))),
@@ -126,6 +149,24 @@ export class DatabaseService {
       this.SessionStorageService.setItem('classes', JSON.stringify(classes));
     })).pipe(
       switchMap(() => of(c.uid))
+    );
+  }
+
+  updateMember(member: ClubMember): Observable<string> {
+    member.expirationDate = moment(member.expirationDate).toDate();
+    member.memberSince = moment(member.memberSince).toDate();
+
+    return from(this.db.collection(`club-members`).doc(member.uid).set(member).then(() => {
+      let clubMembers = JSON.parse(this.SessionStorageService.getItem('club-members'));
+      let i = clubMembers.findIndex((m: ClubMember) => m.uid === member.uid);
+      if (i !== -1) {
+        clubMembers[i] = member;
+      }
+
+      this.SessionStorageService.setItem('member', JSON.stringify(member));
+      this.SessionStorageService.setItem('club-members', JSON.stringify(clubMembers));
+    })).pipe(
+      switchMap(() => of(member.uid))
     );
   }
 

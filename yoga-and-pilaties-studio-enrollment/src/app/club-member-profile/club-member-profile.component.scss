@@ -1,0 +1,21 @@
+.main-section {
+    padding-top: calc(var(--toolbar-height) + 30px);
+    margin: 0 5vw;
+}
+
+.form-inputs-wrapper {
+    display: grid;
+    grid-template-columns: max-content max-content max-content;
+    gap: 2vw;
+    margin-top: 30px;
+}
+
+.expiration {
+    margin-top: 30px;
+    font-size: 17px;
+}
+
+.renew {
+    margin-top: 10px;
+    cursor: pointer;
+}

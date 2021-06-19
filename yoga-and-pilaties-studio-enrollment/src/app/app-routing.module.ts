@@ -1,15 +1,19 @@
 import { NgModule } from '@angular/core';
 import { Router, RouterModule, Routes } from '@angular/router';
 
-import { DbResolverService } from './db.resolver.service';
 import { AuthService } from './auth/auth.service';
+import { isAdminGuard, isMemberGuard } from './auth/auth.guard';
+import { DbResolverService } from './db.resolver.service';
+
 import { HomeComponent } from './home/home.component';
 import { ClubMembersComponent } from './club-members/club-members.component';
+import { ClubMemberProfileComponent } from './club-member-profile/club-member-profile.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: 'home', component: HomeComponent, resolve: { loaded: DbResolverService } },
-  { path: 'club-members', component: ClubMembersComponent, resolve: { loaded: DbResolverService } },
+  { path: 'club-members', component: ClubMembersComponent, resolve: { loaded: DbResolverService }, canActivate: [isAdminGuard] },
+  { path: 'club-member-profile', component: ClubMemberProfileComponent, resolve: { loaded: DbResolverService }, canActivate: [isMemberGuard]  },
 ];
 
 @NgModule({

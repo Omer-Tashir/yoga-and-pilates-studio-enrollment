@@ -9,13 +9,13 @@ import { SessionStorageService } from '../core/session-storage-service';
 import { DatabaseService } from '../core/database.service';
 import { AlertService } from '../core/alerts/alert.service';
 import { Auditorium } from '../model/auditorium';
-import { ClubMember } from '../model/club-member';
+import { ClubMember, MembershipType } from '../model/club-member';
 import { Class, ClassType } from '../model/class';
+import { Admin } from '../model/admin';
 
 import { environment } from 'src/environments/environment';
 
 import * as moment from 'moment/moment';
-import { Admin } from '../model/admin';
 
 declare let Email: any;
 
@@ -189,7 +189,16 @@ export class HomeComponent implements OnInit {
   }
 
   addMyselfToClass(c: Class): void {
-    this.addParticipentToClass(c, this.member.uid);
+    if (this.member.membershipType === MembershipType.MONTHLY && (!!this.member.expirationDate && (moment(this.member.expirationDate).diff(new Date(), 'days') >= 0))) {
+      this.addParticipentToClass(c, this.member.uid);
+    }
+    else if (this.member.membershipType !== MembershipType.MONTHLY && !!this.member.entrancesLeft) {
+      this.addParticipentToClass(c, this.member.uid);
+      this.addMemberEntrence();
+    }
+    else {
+      this.alert.ok('שגיאה', 'יש לחדש את המנוי');
+    }
   }
 
   isMyselfInClass(c: Class) {
@@ -252,6 +261,7 @@ export class HomeComponent implements OnInit {
 
   removeMyselfFromClass(c: Class): void {
     this.removeParticipent(c, this.member.uid);
+    this.removeMemberEntrence();
   }
 
   private addParticipentToClass(c: Class, participent: string): void {
@@ -275,7 +285,6 @@ export class HomeComponent implements OnInit {
 
     this.db.updateClass(c).pipe(first()).subscribe(() => {
       this.classes = JSON.parse(this.sessionStorageService.getItem('classes'));
-      console.log(this.classes);
       this.dateChanged(this.calendarActiveDate);
       this.isLoading = false;
     });
@@ -324,6 +333,30 @@ export class HomeComponent implements OnInit {
         Subject : `הודעה על שיבוץ לשיעור - הסטודיו לפילאטיס ויוגה`,
         Body : `היי ${p.name}, אנו שמחים להודיע לך כי שובצת לשיעור ${c.type} שייערך בתאריך ${this.dateFormatPipe.transform(c.date)} בשעה ${c.hour}:00`,
       });
+    }
+  }
+
+  private addMemberEntrence(): void {
+    if (this.member.membershipType !== MembershipType.MONTHLY) {
+      if (!!this.member.entrancesLeft) {
+        this.member.entrancesLeft-=1;
+        this.db.updateMember(this.member).pipe(first()).subscribe(() => {
+          this.member = JSON.parse(this.sessionStorageService.getItem('member'));
+          this.isLoading = false;
+        });
+      }
+    }
+  }
+
+  private removeMemberEntrence(): void {
+    if (this.member.membershipType !== MembershipType.MONTHLY) {
+      if (this.member.entrancesLeft !== undefined) {
+        this.member.entrancesLeft+=1;
+        this.db.updateMember(this.member).pipe(first()).subscribe(() => {
+          this.member = JSON.parse(this.sessionStorageService.getItem('member'));
+          this.isLoading = false;
+        });
+      }
     }
   }
 
