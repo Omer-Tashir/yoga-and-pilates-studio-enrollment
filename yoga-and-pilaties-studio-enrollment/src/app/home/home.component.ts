@@ -15,6 +15,7 @@ import { Class, ClassType } from '../model/class';
 import { environment } from 'src/environments/environment';
 
 import * as moment from 'moment/moment';
+import { Admin } from '../model/admin';
 
 declare let Email: any;
 
@@ -30,6 +31,11 @@ export class HomeComponent implements OnInit {
   auditoriums!: Auditorium[];
   members!: ClubMember[];
 
+  admin!: Admin;
+  member!: ClubMember;
+
+  isAdmin: boolean;
+  isMember: boolean;
   isLoading = false;
 
   constructor(
@@ -39,9 +45,14 @@ export class HomeComponent implements OnInit {
     private alert: AlertService,
     private dialog: MatDialog
   ) { 
+    this.admin = JSON.parse(this.sessionStorageService.getItem('admin'));
+    this.member = JSON.parse(this.sessionStorageService.getItem('member'));
     this.classes = JSON.parse(this.sessionStorageService.getItem('classes'));
     this.auditoriums = JSON.parse(this.sessionStorageService.getItem('auditoriums'));
     this.members = JSON.parse(this.sessionStorageService.getItem('club-members'));
+
+    this.isAdmin = !!this.admin;
+    this.isMember = !!this.member;
   }
 
   dateChanged(date: Date) {
@@ -60,18 +71,27 @@ export class HomeComponent implements OnInit {
       if(!!auditorium) {
         // auditorium arrangement
         let capacity = auditorium.capacity;
+        let totalParticipents: number = (c.participents?.length ?? 0) + (c.waitingList?.length ?? 0);
         let betterAuditorium = allAuditoriums.find(a => a.capacity > capacity);
 
         if ((c?.waitingList?.length > 0) && (!!betterAuditorium)) {
           // find if the better auditorium is available
           let classInBetterAuditorium = this.dailyClasses.find(cls => ((cls.uid !== c.uid) && (cls.auditorium === betterAuditorium?.uid) && (moment(cls.date).isSame(c.date, 'day')) && (cls.hour === c.hour) && (!cls.waitingList || cls.waitingList.length === 0)));
-          if (!!classInBetterAuditorium) {
+          if (!!classInBetterAuditorium && ((classInBetterAuditorium.participents?.length ?? 0) + (classInBetterAuditorium.waitingList?.length ?? 0) < totalParticipents)) {
             let currentIndex = this.dailyClasses.findIndex(i => i.uid === c?.uid);
             let betterIndex = this.dailyClasses.findIndex(i => i.uid === classInBetterAuditorium?.uid);
             
             if (currentIndex !== -1 && betterIndex !== -1) {
               let currentParticipents = classInBetterAuditorium.participents;
               let currentWaitingList = classInBetterAuditorium.waitingList;
+
+              // check if need to move from participents to waiting list
+              while (currentParticipents?.length > 0 && auditorium?.capacity < currentParticipents?.length) {
+                let wp = currentParticipents.pop();
+                if (!!wp) {
+                  currentWaitingList.push(wp);
+                }
+              }
 
               this.dailyClasses[betterIndex].participents = this.dailyClasses[currentIndex].participents;
               this.dailyClasses[betterIndex].waitingList = this.dailyClasses[currentIndex].waitingList;
@@ -168,6 +188,18 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  addMyselfToClass(c: Class): void {
+    this.addParticipentToClass(c, this.member.uid);
+  }
+
+  isMyselfInClass(c: Class) {
+    return (!!c.participents && !!c.participents.find(p => p === this.member.uid));
+  }
+
+  isMyselfInWaitingList(c: Class) {
+    return (!!c.waitingList && !!c.waitingList.find(p => p === this.member.uid));
+  }
+
   removeParticipent(c: Class, participent: string): void {
     this.isLoading = true;
     c.participents = c.participents.filter(p => p !== participent);
@@ -200,6 +232,10 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  addMyselfToWaitingList(c: Class): void {
+    this.addParticipentToWaitingList(c, this.member.uid);
+  }
+
   removeWaitingList(c: Class, participent: string): void {
     this.isLoading = true;
     c.waitingList = c.waitingList.filter(p => p !== participent);
@@ -208,6 +244,14 @@ export class HomeComponent implements OnInit {
       this.dateChanged(this.calendarActiveDate);
       this.isLoading = false;
     });
+  }
+
+  removeMyselfFromWaitingList(c: Class): void {
+    this.removeWaitingList(c, this.member.uid);
+  }
+
+  removeMyselfFromClass(c: Class): void {
+    this.removeParticipent(c, this.member.uid);
   }
 
   private addParticipentToClass(c: Class, participent: string): void {
@@ -231,6 +275,7 @@ export class HomeComponent implements OnInit {
 
     this.db.updateClass(c).pipe(first()).subscribe(() => {
       this.classes = JSON.parse(this.sessionStorageService.getItem('classes'));
+      console.log(this.classes);
       this.dateChanged(this.calendarActiveDate);
       this.isLoading = false;
     });

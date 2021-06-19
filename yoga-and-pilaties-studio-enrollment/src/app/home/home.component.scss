@@ -64,6 +64,12 @@
                 font-size: 16px;
             }
         }
+
+        &--add-btn-myself {
+            width: 100%;
+            margin-top: 10px !important;
+            cursor: pointer;
+        }
     }
 
     &__daily-classes-class-row {

@@ -5,89 +5,62 @@ import { HttpErrorResponse } from '@angular/common/http';
 
 import { DatabaseService } from '../core/database.service';
 import { AlertService } from '../core/alerts/alert.service';
+import { SessionStorageService } from '../core/session-storage-service';
+
+import { Admin } from '../model/admin';
+import { ClubMember } from '../model/club-member';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
+  admins!: Admin[];
+  members!: ClubMember[];
+
   constructor(
     private afAuth: AngularFireAuth,
     private db: DatabaseService,
     private router: Router,
     private alertService: AlertService,
-  ) {}
+    private sessionStorageService: SessionStorageService,
+  ) {
+    this.admins = JSON.parse(this.sessionStorageService.getItem('admins'));
+    this.members = JSON.parse(this.sessionStorageService.getItem('club-members'));
+  }
 
-  // login(email: string, password: string) {
-  //   this.afAuth
-  //     .signInWithEmailAndPassword(email, password)
-  //     .then((auth) => {
-  //       this.db.getAdmins().subscribe(admins => {
-  //         const currentUser = admins.find(a => a.email === email);
-  //         if (!!currentUser) {
-  //           sessionStorage.setItem('admin', JSON.stringify(currentUser));
-  //         }
+  login(email: string, password: string) {
+    this.admins = JSON.parse(this.sessionStorageService.getItem('admins'));
+    this.members = JSON.parse(this.sessionStorageService.getItem('club-members'));
 
-  //         sessionStorage.setItem('user', JSON.stringify(auth.user));
-  //         this.router.navigate(['']);
-  //       });
-  //     })
-  //     .catch((error: any) => {
-  //       console.log(error);
-  //       this.alertService.httpError(error);
-  //     });
-  // }
+    this.afAuth
+      .signInWithEmailAndPassword(email, password)
+      .then((auth) => {
+        const admin = this.admins.find(a => a.email === email);
+        const member = this.members.find(m => m.email === email);
 
-  // companyLogin(email: string, password: string) {
-  //   this.afAuth
-  //     .signInWithEmailAndPassword(email, password)
-  //     .then((auth) => {
-  //       this.db.getCompanies().subscribe(companies => {
-  //         const currentUser = companies.find(c => c.email === email);
-  //         if (!!currentUser) {
-  //           sessionStorage.setItem('company', JSON.stringify(currentUser));
-  //         }
+        if (!!admin) {
+          sessionStorage.setItem('admin', JSON.stringify(admin));
+        }
+        else if (!!member) {
+          sessionStorage.setItem('member', JSON.stringify(member));
+        }
 
-  //         sessionStorage.setItem('user', JSON.stringify(auth.user));
-  //         this.router.navigate(['company-new-job-offer']);
-  //       });
-  //     })
-  //     .catch((error: any) => {
-  //       console.log(error);
-  //       this.alertService.httpError(error);
-  //     });
-  // }
-  
-  // companyRegister(name: string, contactName: string, contactPhone: string, contactRole: string, phone: string, domain: string, email: string, password: string, image: string) {
-  //   let newCompany: Company = Object.assign({name, contactName, contactPhone, contactRole, phone, domain, email, image}, new Company);
+        sessionStorage.setItem('user', JSON.stringify(auth.user));
+        this.router.navigate(['']);
+      })
+      .catch((error: any) => {
+        console.log(error);
+        this.alertService.httpError(error);
+      });
+  }
 
-  //   this.afAuth.
-  //   createUserWithEmailAndPassword(email, password)
-  //   .then((auth) => {
-  //     this.db.putCompany(newCompany).subscribe(() => {
-  //       sessionStorage.setItem('company', JSON.stringify(newCompany));
-  //       sessionStorage.setItem('user', JSON.stringify(auth.user));
-  //       this.router.navigate(['company-new-job-offer']);
-  //     });
-  //   });
-  // }
+  logout(error?: HttpErrorResponse | undefined) {
+    if (error != undefined) {
+      this.alertService.httpError(error);
+    }
 
-  // logout(error?: HttpErrorResponse | undefined) {
-  //   if (error != undefined) {
-  //     this.alertService.httpError(error);
-  //   }
-
-  //   this.afAuth.signOut();
-  //   sessionStorage.clear();
-  //   this.router.navigate(['login']);
-  // }
-
-  // companyLogout(error?: HttpErrorResponse | undefined) {
-  //   if (error != undefined) {
-  //     this.alertService.httpError(error);
-  //   }
-
-  //   this.afAuth.signOut();
-  //   sessionStorage.clear();
-  //   this.router.navigate(['company-sign-up']);
-  // }
+    this.afAuth.signOut();
+    sessionStorage.clear();
+    this.router.navigate(['login']);
+  }
 }

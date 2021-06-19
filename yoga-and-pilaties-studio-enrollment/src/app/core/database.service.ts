@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { catchError, first, map, shareReplay, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { forkJoin, from, Observable, of, Subject } from 'rxjs';
+import { catchError, first, map, switchMap, tap } from 'rxjs/operators';
+import { forkJoin, from, Observable, of } from 'rxjs';
 
 import { SessionStorageService } from './session-storage-service';
 import { Auditorium } from '../model/auditorium';
 import { ClubMember } from '../model/club-member';
 import { Class } from '../model/class';
+import { Admin } from '../model/admin';
 
 import * as moment from 'moment/moment';
 
@@ -24,12 +25,28 @@ export class DatabaseService {
 
   init(): Observable<boolean> {
     return forkJoin([
+      this.getAdmins().pipe(first()),
       this.getAuditoriums().pipe(first()),
       this.getClasses().pipe(first()),
       this.getClubMembers().pipe(first())
     ]).pipe(
       map(results => !!results)
     );
+  }
+
+  private getAdmins(): Observable<Admin[]> {
+    if(!this.SessionStorageService.getItem('admins')) {
+      return this.db.collection(`admins`).get().pipe(
+        map(admins => admins.docs.map(doc => {
+          return <Admin>doc.data();
+        })),
+        tap(admins => this.SessionStorageService.setItem('admins', JSON.stringify(admins))),
+        catchError(err => of([])),
+      );
+    }
+    else {
+      return of(JSON.parse(this.SessionStorageService.getItem('admins')));
+    }
   }
 
   private getAuditoriums(): Observable<Auditorium[]> {
@@ -56,7 +73,6 @@ export class DatabaseService {
           c.date = moment(data['date'].toDate()).utc().toDate();
           return c;
         })),
-        tap(classes => console.log(classes)),
         tap(classes => this.SessionStorageService.setItem('classes', JSON.stringify(classes))),
         catchError(err => of([])),
       );
@@ -103,7 +119,7 @@ export class DatabaseService {
     return from(this.db.collection(`classes`).doc(c.uid).set(c).then(() => {
       let classes = JSON.parse(this.SessionStorageService.getItem('classes'));
       let i = classes.findIndex((cls: Class) => cls.uid === c.uid);
-      if (!!i) {
+      if (i !== -1) {
         classes[i] = c;
       }
 

@@ -7,6 +7,8 @@ import {
 
 import { DatabaseService } from '../database.service';
 import { AuthService } from '../../auth/auth.service';
+import { Admin } from 'src/app/model/admin';
+import { ClubMember } from 'src/app/model/club-member';
 
 @Component({
   selector: 'app-toolbar',
@@ -17,12 +19,10 @@ import { AuthService } from '../../auth/auth.service';
 export class ToolbarComponent implements OnInit {
   loggedIn: boolean = false;
   isAdmin: boolean = false;
-  isCompany: boolean = false;
+  isMember: boolean = false;
 
-  photoLoaded = false;
-  displayName!: string;
+  name!: string;
   email!: string;
-  image!: string;
 
   constructor(
     public db: DatabaseService,
@@ -31,40 +31,30 @@ export class ToolbarComponent implements OnInit {
   ) {}
 
   logout(): void {
-    //this.authService.logout();
+    this.authService.logout();
   }
 
   ngOnInit(): void {
-    // const loadUser = sessionStorage.getItem('user');
-    // const loadCompany = sessionStorage.getItem('company');
-    // const loadAdmin = sessionStorage.getItem('admin');
+    const loadMember = sessionStorage.getItem('member');
+    const loadAdmin = sessionStorage.getItem('admin');
 
-    // if (!!loadAdmin) {
-    //   const admin: Admin = JSON.parse(loadAdmin);
-    //   this.displayName = admin.displayName;
-    //   this.email = admin.email;
-    //   this.image = admin.image;
+    if (!!loadAdmin) {
+      const admin: Admin = JSON.parse(loadAdmin);
+      this.name = admin.name;
+      this.email = admin.email;
 
-    //   this.isAdmin = true;
-    // }
-    // else if (!!loadCompany) {
-    //   const company: Company = JSON.parse(loadCompany);
-    //   this.displayName = company.name;
-    //   this.email = company.email;
-    //   this.image = company.image;
+      this.isAdmin = true;
+    }
+    else if (!!loadMember) {
+      const member: ClubMember = JSON.parse(loadMember);
+      this.name = member.name;
+      this.email = member.email;
       
-    //   this.isCompany = true;
-    // }
-    // else if (!!loadUser) {
-    //   const user = JSON.parse(loadUser);
-    //   this.displayName = user.displayName;
-    //   this.email = user.email;
-    //   this.image = user.photoURL;
-    // }
+      this.isMember = true;
+    }
 
-    // if(!!loadAdmin || !!loadCompany || !!loadUser) {
-    //   this.photoLoaded = true;
-    //   this.loggedIn = true;
-    // }
+    if (!!loadAdmin || !!loadMember) {
+      this.loggedIn = true;
+    }
   }
 }

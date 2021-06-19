@@ -2,11 +2,7 @@
     <div class="navbar">
       <div class="login">
         <ng-container *ngIf="!!loggedIn">
-          <span *ngIf="!!image" class="image">
-            <img [ngClass]="{'hidden': !photoLoaded}" [attr.src]="image" width="45" height="45"
-              (load)="photoLoaded = true">
-          </span>
-          <span *ngIf="!!displayName" class="display-name">{{ displayName }}</span> |
+          <span *ngIf="!!name" class="display-name">היי {{ name }}</span> |
           <span class="logout" (click)="logout()">התנתק</span>
         </ng-container>
 
@@ -21,7 +17,10 @@
           <li>
             <a [routerLink]="'/home'">ראשי</a>
           </li>
-          <li>
+          <li *ngIf="isMember">
+            <a [routerLink]="'/club-member'">פרטי מנוי</a>
+          </li>
+          <li *ngIf="isAdmin">
             <a [routerLink]="'/club-members'">רשימת מנויים</a>
           </li>
         </ul>

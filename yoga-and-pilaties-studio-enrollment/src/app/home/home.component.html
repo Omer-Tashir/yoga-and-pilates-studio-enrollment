@@ -5,13 +5,17 @@
         <div class="home__daily-classes-header">
             <h2 class="home__daily-classes-title">לוח חוגים יומי - {{calendarActiveDate | dateFormat}}:</h2>
         
-            <button mat-fab class="home__daily-classes-add-btn" (click)="addClass()" matTooltip="הוספת שיעור חדש">
-                <mat-icon>add</mat-icon>
-            </button>
+            <ng-container *ngIf="isAdmin">
 
-            <button mat-fab class="home__daily-classes-add-btn" (click)="runAlgorithem()" matTooltip="הרץ אלגוריתם סידור">
-                <mat-icon>online_prediction</mat-icon>
-            </button>
+                <button mat-fab class="home__daily-classes-add-btn" (click)="addClass()" matTooltip="הוספת שיעור חדש">
+                    <mat-icon>add</mat-icon>
+                </button>
+    
+                <button mat-fab class="home__daily-classes-add-btn" (click)="runAlgorithem()" matTooltip="הרץ אלגוריתם סידור">
+                    <mat-icon>online_prediction</mat-icon>
+                </button>
+
+            </ng-container>
         </div>
 
         <div class="home__daily-classes-body">
@@ -34,17 +38,29 @@
                     <p class="home__daily-classes-class--hour"></p>
                     <div class="home__daily-classes-class--participents">
                         <div class="home__daily-classes-class--participent" *ngFor="let participent of getParticipents(class) | sort:'name'">
-                            <button mat-fab (click)="removeParticipent(class, participent.uid)" matTooltip="הסר השתתפות">
-                                <mat-icon>remove</mat-icon>
-                            </button>
+
+                            <ng-container *ngIf="isAdmin">
+
+                                <button mat-fab (click)="removeParticipent(class, participent.uid)" matTooltip="הסר השתתפות">
+                                    <mat-icon>remove</mat-icon>
+                                </button>
+
+                            </ng-container>
+
                             <p>{{participent.name}}</p>
                         </div>
                     </div>
                     <div class="home__daily-classes-class--waiting-list">
                         <div class="home__daily-classes-class--participent" *ngFor="let participent of getWaitingList(class) | sort:'name'">
-                            <button mat-fab (click)="removeWaitingList(class, participent.uid)" matTooltip="הסר השתתפות">
-                                <mat-icon>remove</mat-icon>
-                            </button>
+
+                            <ng-container *ngIf="isAdmin">
+
+                                <button mat-fab (click)="removeWaitingList(class, participent.uid)" matTooltip="הסר השתתפות">
+                                    <mat-icon>remove</mat-icon>
+                                </button>
+
+                            </ng-container>
+
                             <p>{{participent.name}}</p>
                         </div>
                     </div>
@@ -55,14 +71,57 @@
                     <p class="home__daily-classes-class--auditorium"></p>
                     <p class="home__daily-classes-class--hour"></p>
                     <div class="home__daily-classes-class--participents">
-                        <button mat-fab class="home__daily-classes-class--add-btn" [disabled]="!canJoinClass(class)" (click)="addParticipent(class)" matTooltip="רישום משתתף">
-                            <mat-icon>add</mat-icon>
-                        </button>
+
+                        <ng-container *ngIf="isAdmin">
+
+                            <button mat-fab class="home__daily-classes-class--add-btn" [disabled]="!canJoinClass(class)" (click)="addParticipent(class)" matTooltip="רישום משתתף">
+                                <mat-icon>add</mat-icon>
+                            </button>
+
+                        </ng-container>
+
+                        <ng-container *ngIf="isMember">
+
+                            <ng-container *ngIf="isMyselfInClass(class)">
+                                <button class="home__daily-classes-class--add-btn-myself" (click)="removeMyselfFromClass(class)">
+                                    <span>הסר אותי מהשיעור</span>
+                                </button>
+                            </ng-container>
+
+                            <ng-container *ngIf="!isMyselfInClass(class)">
+                                <button class="home__daily-classes-class--add-btn-myself" [disabled]="!canJoinClass(class)" (click)="addMyselfToClass(class)">
+                                    <span>הירשם לשיעור</span>
+                                </button>
+                            </ng-container>
+
+                        </ng-container>
+
                     </div>
                     <div class="home__daily-classes-class--waiting-list">
-                        <button mat-fab class="home__daily-classes-class--add-btn" [disabled]="canJoinClass(class)" (click)="addWaitingList(class)" matTooltip="רישום משתתף לרשימת הממתנה">
-                            <mat-icon>add</mat-icon>
-                        </button>
+
+                        <ng-container *ngIf="isAdmin">
+
+                            <button mat-fab class="home__daily-classes-class--add-btn" [disabled]="canJoinClass(class)" (click)="addWaitingList(class)" matTooltip="רישום משתתף לרשימת הממתנה">
+                                <mat-icon>add</mat-icon>
+                            </button>
+
+                        </ng-container>
+
+                        <ng-container *ngIf="isMember">
+                            
+                            <ng-container *ngIf="isMyselfInWaitingList(class)">
+                                <button class="home__daily-classes-class--add-btn-myself" (click)="removeMyselfFromWaitingList(class)">
+                                    <span>הסר אותי מהרשימה</span>
+                                </button>
+                            </ng-container>
+
+                            <ng-container *ngIf="!isMyselfInWaitingList(class)">
+                                <button class="home__daily-classes-class--add-btn-myself" [disabled]="canJoinClass(class) || isMyselfInClass(class)" (click)="addMyselfToWaitingList(class)">
+                                    <span>הירשם לרשימת המתנה</span>
+                                </button>
+                            </ng-container>
+
+                        </ng-container>
                     </div>
                 </div>
             </div>

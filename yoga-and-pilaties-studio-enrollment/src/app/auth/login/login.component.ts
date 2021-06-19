@@ -32,9 +32,9 @@ export class LoginComponent {
       return;
     }
 
-    // this.authService.login(
-    //   this.formGroup.get('email')?.value,
-    //   this.formGroup.get('password')?.value
-    // );
+    this.authService.login(
+      this.formGroup.get('email')?.value,
+      this.formGroup.get('password')?.value
+    );
   }
 }
