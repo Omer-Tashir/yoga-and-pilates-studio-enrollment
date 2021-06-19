@@ -90,7 +90,6 @@ export class ClubMembersComponent implements OnInit, AfterViewInit {
           this.initDatasource(this.members);
 
           this.alert.ok('תודה רבה, קלטנו את פרטי המנוי בהצלחה', 'כעת ניתן לשבץ את המנוי לחוגים השונים');
-          this.form.reset();
         });
       });
     }

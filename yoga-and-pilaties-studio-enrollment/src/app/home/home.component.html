@@ -8,6 +8,10 @@
             <button mat-fab class="home__daily-classes-add-btn" (click)="addClass()" matTooltip="הוספת שיעור חדש">
                 <mat-icon>add</mat-icon>
             </button>
+
+            <button mat-fab class="home__daily-classes-add-btn" (click)="runAlgorithem()" matTooltip="הרץ אלגוריתם סידור">
+                <mat-icon>online_prediction</mat-icon>
+            </button>
         </div>
 
         <div class="home__daily-classes-body">
@@ -29,14 +33,20 @@
                     <p class="home__daily-classes-class--auditorium"></p>
                     <p class="home__daily-classes-class--hour"></p>
                     <div class="home__daily-classes-class--participents">
-                        <p *ngFor="let participent of getParticipents(class)">
-                            {{participent.name}}
-                        </p>
+                        <div class="home__daily-classes-class--participent" *ngFor="let participent of getParticipents(class) | sort:'name'">
+                            <button mat-fab (click)="removeParticipent(class, participent.uid)" matTooltip="הסר השתתפות">
+                                <mat-icon>remove</mat-icon>
+                            </button>
+                            <p>{{participent.name}}</p>
+                        </div>
                     </div>
                     <div class="home__daily-classes-class--waiting-list">
-                        <p *ngFor="let participent of getWaitingList(class)">
-                            {{participent.name}}
-                        </p>
+                        <div class="home__daily-classes-class--participent" *ngFor="let participent of getWaitingList(class) | sort:'name'">
+                            <button mat-fab (click)="removeWaitingList(class, participent.uid)" matTooltip="הסר השתתפות">
+                                <mat-icon>remove</mat-icon>
+                            </button>
+                            <p>{{participent.name}}</p>
+                        </div>
                     </div>
                 </div>
 
@@ -45,12 +55,12 @@
                     <p class="home__daily-classes-class--auditorium"></p>
                     <p class="home__daily-classes-class--hour"></p>
                     <div class="home__daily-classes-class--participents">
-                        <button mat-fab class="home__daily-classes-class--add-btn" (click)="addParticipent(class)" matTooltip="רישום משתתף">
+                        <button mat-fab class="home__daily-classes-class--add-btn" [disabled]="!canJoinClass(class)" (click)="addParticipent(class)" matTooltip="רישום משתתף">
                             <mat-icon>add</mat-icon>
                         </button>
                     </div>
                     <div class="home__daily-classes-class--waiting-list">
-                        <button mat-fab class="home__daily-classes-class--add-btn" (click)="addWaitingList(class)" matTooltip="רישום משתתף לרשימת הממתנה">
+                        <button mat-fab class="home__daily-classes-class--add-btn" [disabled]="canJoinClass(class)" (click)="addWaitingList(class)" matTooltip="רישום משתתף לרשימת הממתנה">
                             <mat-icon>add</mat-icon>
                         </button>
                     </div>
@@ -61,3 +71,7 @@
 
     <app-calendar (dateChanged)="dateChanged($event)"></app-calendar>
 </div>
+
+<mat-card *ngIf="isLoading" class="mat-progress-spinner">
+    <mat-progress-spinner color="primary" mode="indeterminate"></mat-progress-spinner>
+</mat-card>

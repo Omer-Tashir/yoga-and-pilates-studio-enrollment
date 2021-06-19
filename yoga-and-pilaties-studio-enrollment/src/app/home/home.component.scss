@@ -4,28 +4,50 @@
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 5vw;
-    
-    &__daily-classes {
-    }
 
     &__daily-classes-header {
-        display: flex;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: 1fr 56px 56px;
+        align-items: center;
         margin-bottom: 3vh;
-    }
-
-    &__daily-classes-body {
+        gap: 10px;
     }
 
     &__daily-classes-title {
         margin: 0;
     }
 
-    &__daily-classes-add-btn {
-
-    }
-
     &__daily-classes-class {
+
+        &--participent {
+            display: flex;
+            justify-content: start;
+            align-items: baseline;
+            margin-bottom: 5px !important;
+            gap: 10px;
+            
+            p {
+                font-size: 12px;
+                padding: 0 5px !important;
+    
+                &:last-child {
+                    padding-bottom: 5px !important;
+                }
+    
+                &:first-child {
+                    padding-top: 5px !important;
+                }
+            }
+
+            button {
+                height: 30px;
+                width: 30px;
+    
+                &::ng-deep mat-icon {
+                    font-size: 16px;
+                }
+            }
+        }
 
         &--auditorium {
 

@@ -6,7 +6,7 @@
       
       <mat-form-field>
         <mat-select placeholder="בחר מנוי" formControlName="member">
-          <mat-option *ngFor="let member of members" [value]="member.uid">{{member.name}}</mat-option>
+          <mat-option *ngFor="let member of members | sort:'name'" [value]="member.uid">{{member.name}}</mat-option>
         </mat-select>
         <mat-error *ngIf="hasError('member', 'required')">חובה לבחור מנוי</mat-error>
       </mat-form-field>
