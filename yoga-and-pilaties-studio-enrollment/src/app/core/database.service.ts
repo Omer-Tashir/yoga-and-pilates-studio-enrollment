@@ -18,9 +18,8 @@ import * as moment from 'moment/moment';
 export class DatabaseService {
 
   constructor(
-    private SessionStorageService: SessionStorageService,
     private db: AngularFirestore,
-    private http: HttpClient
+    private SessionStorageService: SessionStorageService
   ) { }
 
   init(): Observable<boolean> {

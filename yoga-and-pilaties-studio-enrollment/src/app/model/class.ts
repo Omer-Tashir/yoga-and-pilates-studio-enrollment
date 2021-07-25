@@ -8,7 +8,7 @@ export class Class {
     date!: any;
     hour!: number;
     type!: ClassType;
-    auditorium!: string;
-    participents!: Array<string>;
+    auditorium!: any;
+    participents!: any;
     waitingList!: Array<string>;
 }

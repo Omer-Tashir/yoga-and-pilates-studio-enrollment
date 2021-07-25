@@ -60,7 +60,7 @@ export class HomeComponent implements OnInit {
     this.dailyClasses = this.classes?.filter(c => moment(c.date).isSame(date, 'day')) ?? [];
   }
 
-  runAlgorithem () {
+  private runAlgorithem() {
     this.isLoading = true;
 
     this.dailyClasses.forEach(c => {
@@ -156,7 +156,7 @@ export class HomeComponent implements OnInit {
           this.db.createClass(newClass).pipe(first()).subscribe(() => {
             this.classes = JSON.parse(this.sessionStorageService.getItem('classes'));
             this.dateChanged(this.calendarActiveDate);
-            this.isLoading = false;
+            this.runAlgorithem();
           });
         }
       }
@@ -202,7 +202,7 @@ export class HomeComponent implements OnInit {
   }
 
   isMyselfInClass(c: Class) {
-    return (!!c.participents && !!c.participents.find(p => p === this.member.uid));
+    return (!!c.participents && !!c.participents.find((p: any) => p === this.member.uid));
   }
 
   isMyselfInWaitingList(c: Class) {
@@ -211,11 +211,11 @@ export class HomeComponent implements OnInit {
 
   removeParticipent(c: Class, participent: string): void {
     this.isLoading = true;
-    c.participents = c.participents.filter(p => p !== participent);
+    c.participents = c.participents.filter((p:any) => p !== participent);
     this.db.updateClass(c).pipe(first()).subscribe(() => {
       this.classes = JSON.parse(this.sessionStorageService.getItem('classes'));
       this.dateChanged(this.calendarActiveDate);
-      this.isLoading = false;
+      this.runAlgorithem();
     });
   }
 
@@ -251,7 +251,7 @@ export class HomeComponent implements OnInit {
     this.db.updateClass(c).pipe(first()).subscribe(() => {
       this.classes = JSON.parse(this.sessionStorageService.getItem('classes'));
       this.dateChanged(this.calendarActiveDate);
-      this.isLoading = false;
+      this.runAlgorithem();
     });
   }
 
@@ -260,8 +260,20 @@ export class HomeComponent implements OnInit {
   }
 
   removeMyselfFromClass(c: Class): void {
-    this.removeParticipent(c, this.member.uid);
-    this.removeMemberEntrence();
+    // check if class can be cancelled (less than 6 hours from it)
+    var now = moment();
+    var date: Date = new Date(c.date);
+    date.setHours(c.hour);
+    var classDate = moment(date);
+    
+    if (now.diff(classDate, 'hours') <= 6) {
+      this.alert.ok('שגיאה', 'לא ניתן לבטל השתתפות 6 שעות לפני מועד השיעור');
+      return;
+    }
+    else {
+      this.removeParticipent(c, this.member.uid);
+      this.removeMemberEntrence();
+    }
   }
 
   private addParticipentToClass(c: Class, participent: string): void {
@@ -286,13 +298,13 @@ export class HomeComponent implements OnInit {
     this.db.updateClass(c).pipe(first()).subscribe(() => {
       this.classes = JSON.parse(this.sessionStorageService.getItem('classes'));
       this.dateChanged(this.calendarActiveDate);
-      this.isLoading = false;
+      this.runAlgorithem();
     });
   }
 
   private addParticipentToWaitingList(c: Class, participent: string): void {
     if (!!participent) {
-        if (!!c.participents && !!c.participents.find(p => p === participent)) {
+      if (!!c.participents && !!c.participents.find((p: any) => p === participent)) {
           this.alert.ok('שגיאה', 'המנוי משתתף בשיעור המבוקש');
           this.isLoading = false;
           return;
@@ -317,7 +329,7 @@ export class HomeComponent implements OnInit {
     this.db.updateClass(c).pipe(first()).subscribe(() => {
       this.classes = JSON.parse(this.sessionStorageService.getItem('classes'));
       this.dateChanged(this.calendarActiveDate);
-      this.isLoading = false;
+      this.runAlgorithem();
     });
   }
 
@@ -342,7 +354,7 @@ export class HomeComponent implements OnInit {
         this.member.entrancesLeft-=1;
         this.db.updateMember(this.member).pipe(first()).subscribe(() => {
           this.member = JSON.parse(this.sessionStorageService.getItem('member'));
-          this.isLoading = false;
+          this.runAlgorithem();
         });
       }
     }
@@ -354,7 +366,7 @@ export class HomeComponent implements OnInit {
         this.member.entrancesLeft+=1;
         this.db.updateMember(this.member).pipe(first()).subscribe(() => {
           this.member = JSON.parse(this.sessionStorageService.getItem('member'));
-          this.isLoading = false;
+          this.runAlgorithem();
         });
       }
     }

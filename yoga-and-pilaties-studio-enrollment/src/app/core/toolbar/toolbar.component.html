@@ -23,6 +23,13 @@
           <li *ngIf="isAdmin">
             <a [routerLink]="'/club-members'">רשימת מנויים</a>
           </li>
+          <li *ngIf="isAdmin">
+            <span class="click" (click)="exportClubMembers()">דו״ח מנויים</span>
+          </li>
+
+          <li *ngIf="isAdmin">
+            <span class="click" (click)="exportClasses()">דו״ח שיעורים</span>
+          </li>
         </ul>
       </div>
     </div>

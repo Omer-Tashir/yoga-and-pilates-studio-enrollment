@@ -84,3 +84,12 @@
 .logout:hover {
   text-decoration: underline;
 }
+
+.click {
+  color: white;
+  cursor: pointer;
+}
+
+.click:hover {
+  text-decoration: underline;
+}
