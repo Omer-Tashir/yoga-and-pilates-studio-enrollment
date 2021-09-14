@@ -23,6 +23,36 @@ export class isAdminGuard implements CanActivate {
 @Injectable({
   providedIn: 'root',
 })
+export class isTeacherGuard implements CanActivate {
+  constructor() { }
+  canActivate(
+    next: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      !!sessionStorage.getItem('teacher') ? resolve(true) : reject();
+    });
+  }
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+export class isAdminOrTeacherGuard implements CanActivate {
+  constructor() { }
+  canActivate(
+    next: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      !!sessionStorage.getItem('admin') || !!sessionStorage.getItem('teacher') ? resolve(true) : reject();
+    });
+  }
+}
+
+@Injectable({
+  providedIn: 'root',
+})
 export class isMemberGuard implements CanActivate {
   constructor() {}
   canActivate(

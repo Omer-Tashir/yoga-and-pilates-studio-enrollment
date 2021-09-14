@@ -9,12 +9,14 @@ import { SessionStorageService } from '../core/session-storage-service';
 
 import { Admin } from '../model/admin';
 import { ClubMember } from '../model/club-member';
+import { Teacher } from '../model/teacher';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   admins!: Admin[];
+  teachers!: Teacher[];
   members!: ClubMember[];
 
   constructor(
@@ -25,21 +27,27 @@ export class AuthService {
     private sessionStorageService: SessionStorageService,
   ) {
     this.admins = JSON.parse(this.sessionStorageService.getItem('admins'));
+    this.teachers = JSON.parse(this.sessionStorageService.getItem('teachers'));
     this.members = JSON.parse(this.sessionStorageService.getItem('club-members'));
   }
 
   login(email: string, password: string) {
     this.admins = JSON.parse(this.sessionStorageService.getItem('admins'));
+    this.teachers = JSON.parse(this.sessionStorageService.getItem('teachers'));
     this.members = JSON.parse(this.sessionStorageService.getItem('club-members'));
 
     this.afAuth
       .signInWithEmailAndPassword(email, password)
       .then((auth) => {
         const admin = this.admins.find(a => a.email === email);
+        const teacher = this.teachers.find(a => a.email === email);
         const member = this.members.find(m => m.email === email);
 
         if (!!admin) {
           sessionStorage.setItem('admin', JSON.stringify(admin));
+        }
+        else if (!!teacher) {
+          sessionStorage.setItem('teacher', JSON.stringify(teacher));
         }
         else if (!!member) {
           sessionStorage.setItem('member', JSON.stringify(member));

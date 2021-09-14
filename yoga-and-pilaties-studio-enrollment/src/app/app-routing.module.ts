@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { Router, RouterModule, Routes } from '@angular/router';
 
 import { AuthService } from './auth/auth.service';
-import { isAdminGuard, isMemberGuard } from './auth/auth.guard';
+import { isAdminGuard, isAdminOrTeacherGuard, isMemberGuard } from './auth/auth.guard';
 import { DbResolverService } from './db.resolver.service';
 
 import { HomeComponent } from './home/home.component';
@@ -12,7 +12,7 @@ import { ClubMemberProfileComponent } from './club-member-profile/club-member-pr
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: 'home', component: HomeComponent, resolve: { loaded: DbResolverService } },
-  { path: 'club-members', component: ClubMembersComponent, resolve: { loaded: DbResolverService }, canActivate: [isAdminGuard] },
+  { path: 'club-members', component: ClubMembersComponent, resolve: { loaded: DbResolverService }, canActivate: [isAdminOrTeacherGuard] },
   { path: 'club-member-profile', component: ClubMemberProfileComponent, resolve: { loaded: DbResolverService }, canActivate: [isMemberGuard]  },
 ];
 

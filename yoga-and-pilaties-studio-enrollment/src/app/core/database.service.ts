@@ -11,6 +11,7 @@ import { Class } from '../model/class';
 import { Admin } from '../model/admin';
 
 import * as moment from 'moment/moment';
+import { Teacher } from '../model/teacher';
 
 @Injectable({
   providedIn: 'root',
@@ -25,6 +26,7 @@ export class DatabaseService {
   init(): Observable<boolean> {
     return forkJoin([
       this.getAdmins().pipe(first()),
+      this.getTeachers().pipe(first()),
       this.getAuditoriums().pipe(first()),
       this.getClasses().pipe(first()),
       this.getClubMembers().pipe(first())
@@ -45,6 +47,21 @@ export class DatabaseService {
     }
     else {
       return of(JSON.parse(this.SessionStorageService.getItem('admins')));
+    }
+  }
+
+  private getTeachers(): Observable<Teacher[]> {
+    if (!this.SessionStorageService.getItem('teachers')) {
+      return this.db.collection(`teachers`).get().pipe(
+        map(teachers => teachers.docs.map(doc => {
+          return <Teacher>doc.data();
+        })),
+        tap(teachers => this.SessionStorageService.setItem('teachers', JSON.stringify(teachers))),
+        catchError(err => of([])),
+      );
+    }
+    else {
+      return of(JSON.parse(this.SessionStorageService.getItem('teachers')));
     }
   }
 

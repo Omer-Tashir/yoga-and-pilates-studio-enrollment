@@ -14,8 +14,10 @@ import { Class } from 'src/app/model/class';
 import * as moment from 'moment/moment';
 import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
+
 import { Auditorium } from 'src/app/model/auditorium';
 import { SessionStorageService } from '../session-storage-service';
+import { Teacher } from 'src/app/model/teacher';
 
 
 const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
@@ -29,6 +31,7 @@ const EXCEL_EXTENSION = '.xlsx';
 export class ToolbarComponent implements OnInit {
   loggedIn: boolean = false;
   isAdmin: boolean = false;
+  isTeacher: boolean = false;
   isMember: boolean = false;
   auditoriums!: Auditorium[];
   members!: ClubMember[];
@@ -53,15 +56,16 @@ export class ToolbarComponent implements OnInit {
           m.expirationDate = '';
         }
       });
-      const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(json);
-
-      worksheet['A1'].v = "שם המנוי";
-      worksheet['B1'].v = "תאריך סיום המנוי";
-      worksheet['C1'].v = "הצטרף בתאריך";
-      worksheet['D1'].v = "אימייל";
-      worksheet['E1'].v = "מזהה מנוי";
-      worksheet['F1'].v = "כניסות שנשארו";
-      worksheet['G1'].v = "סוג מנוי";
+    
+      let stringified = JSON.stringify(json);
+      stringified = stringified.replace(/memberSince/gm, "תאריך הצטרפות");
+      stringified = stringified.replace(/membershipType/gm, "מזהה מנוי");
+      stringified = stringified.replace(/expirationDate/gm, "תאריך סיום מנוי חודשי");
+      stringified = stringified.replace(/entrancesLeft/gm, "כניסות שנשארו");
+      stringified = stringified.replace(/uid/gm, "ת.ז");
+      stringified = stringified.replace(/name/gm, "שם מנוי");
+      stringified = stringified.replace(/email/gm, "אימייל");
+      const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(JSON.parse(stringified));
 
       const workbook: XLSX.WorkBook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
       const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
@@ -77,14 +81,16 @@ export class ToolbarComponent implements OnInit {
         c.participents = this.getParticipents(c).map(p => p.name).toString();
         c.auditorium = this.getAuditorium(c)?.name;
       });
-      const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(json);
 
-      worksheet['A1'].v = "משתתפים";
-      worksheet['B1'].v = "שעת התחלה";
-      worksheet['C1'].v = "תאריך";
-      worksheet['D1'].v = "מזהה שיעור";
-      worksheet['E1'].v = "אולם";
-      worksheet['F1'].v = "סוג השיעור";
+      let stringified = JSON.stringify(json);
+      stringified = stringified.replace(/uid/gm, "מזהה שיעור");
+      stringified = stringified.replace(/date/gm, "תאריך");
+      stringified = stringified.replace(/hour/gm, "שעת התחלה");
+      stringified = stringified.replace(/type/gm, "סוג שיעור");
+      stringified = stringified.replace(/auditorium/gm, "אולם");
+      stringified = stringified.replace(/participents/gm, "משתתפים");
+      stringified = stringified.replace(/waitingList/gm, "רשימת המתנה");
+      const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(JSON.parse(stringified));
 
       const workbook: XLSX.WorkBook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
       const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
@@ -112,6 +118,7 @@ export class ToolbarComponent implements OnInit {
   ngOnInit(): void {
     const loadMember = sessionStorage.getItem('member');
     const loadAdmin = sessionStorage.getItem('admin');
+    const loadTeacher = sessionStorage.getItem('teacher');
 
     if (!!loadAdmin) {
       const admin: Admin = JSON.parse(loadAdmin);
@@ -119,6 +126,13 @@ export class ToolbarComponent implements OnInit {
       this.email = admin.email;
 
       this.isAdmin = true;
+    }
+    else if (!!loadTeacher) {
+      const teacher: Teacher = JSON.parse(loadTeacher);
+      this.name = teacher.name;
+      this.email = teacher.email;
+
+      this.isTeacher = true;
     }
     else if (!!loadMember) {
       const member: ClubMember = JSON.parse(loadMember);
@@ -128,7 +142,7 @@ export class ToolbarComponent implements OnInit {
       this.isMember = true;
     }
 
-    if (!!loadAdmin || !!loadMember) {
+    if (!!loadAdmin || !!loadTeacher || !!loadMember) {
       this.loggedIn = true;
     }
   }

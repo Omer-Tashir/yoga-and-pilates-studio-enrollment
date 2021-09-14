@@ -20,14 +20,14 @@
           <li *ngIf="isMember">
             <a [routerLink]="'/club-member-profile'">פרטי מנוי</a>
           </li>
-          <li *ngIf="isAdmin">
+          <li *ngIf="isAdmin || isTeacher">
             <a [routerLink]="'/club-members'">רשימת מנויים</a>
           </li>
-          <li *ngIf="isAdmin">
+          <li *ngIf="isAdmin || isTeacher">
             <span class="click" (click)="exportClubMembers()">דו״ח מנויים</span>
           </li>
 
-          <li *ngIf="isAdmin">
+          <li *ngIf="isAdmin || isTeacher">
             <span class="click" (click)="exportClasses()">דו״ח שיעורים</span>
           </li>
         </ul>
