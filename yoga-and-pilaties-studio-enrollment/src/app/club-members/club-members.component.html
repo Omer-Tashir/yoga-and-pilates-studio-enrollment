@@ -82,6 +82,31 @@
         </div>
   
         <button (click)="submit(form?.value)" class="submit-btn" mat-raised-button color="primary" [disabled]="!form?.valid">צור מנוי</button>
+      
+        <section class="clubMemberForm">
+          <h2>שליחת הודעה למנוי\ם</h2>
+          <div class="inputs-container">
+            <form [formGroup]="clubMemberForm" autocomplete="new-phone" novalidate fxLayout="column wrap"
+              fxLayoutAlign="center center" fxLayoutGap="10px">
+              <div class="form-inputs-wrapper-club-member">
+                <mat-form-field>
+                  <mat-select multiple placeholder="בחר מנוי\ם" formControlName="memberUid">
+                    <mat-option *ngFor="let member of members | sort:'name'" [value]="member.uid">{{member.name}}</mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="clubMemberFormHasError('memberUid', 'required')">חובה לבחור לפחות מנוי אחד</mat-error>
+                </mat-form-field>
+        
+                <div class="message-textarea">
+                  <textarea placeholder="הודעה" formControlName="message"></textarea>
+                  <mat-error *ngIf="clubMemberFormHasError('message', 'required')">חובה להזין הודעה</mat-error>
+                </div>
+              </div>
+            </form>
+          </div>
+        
+          <button (click)="sendMessageToClubMember(clubMemberForm?.value)" class="submit-btn" mat-raised-button color="primary"
+            [disabled]="!clubMemberForm?.valid">שלח</button>
+        </section>
       </section>
     </div>
 </div>

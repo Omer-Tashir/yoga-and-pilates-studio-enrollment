@@ -15,6 +15,13 @@
     gap: 2vw;
 }
 
+.form-inputs-wrapper-club-member {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 2vw;
+}
+
 .submit-btn {
     margin-top: 25px;
 }
@@ -22,4 +29,17 @@
 .link:hover {
     cursor: pointer;
     text-decoration: underline;
+}
+
+.clubMemberForm {
+    margin-top: 100px;
+}
+
+.message-textarea {
+    display: block;
+    
+    textarea {
+        width: 100%;
+        height: 10vh;
+    }
 }

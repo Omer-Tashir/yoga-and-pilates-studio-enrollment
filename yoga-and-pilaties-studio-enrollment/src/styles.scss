@@ -250,7 +250,6 @@ button[mat-button],
 .mat-raised-button.mat-primary {
   border-bottom: 4px solid #cfcece;
   box-sizing: border-box;
-  font-size: 18px;
   color: #0b2242;
   background-color: #dcdcdc;
   font-weight: 700;
@@ -360,7 +359,6 @@ input[readonly="true"] {
 
 .mat-snack-bar-container .mat-dialog-title {
   color: rgb(38, 38, 38) !important;
-  font-size: 18px;
 }
 
 .mat-snack-bar-container .alert-footer,
@@ -444,7 +442,6 @@ mat-sidenav {
 
 .mat-step-header .mat-step-label {
   font-weight: 100;
-  font-size: 18px;
   color: #9e9e9e;
   width: 100%;
 }

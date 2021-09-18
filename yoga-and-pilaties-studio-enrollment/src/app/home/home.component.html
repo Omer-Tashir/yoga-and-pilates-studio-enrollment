@@ -120,6 +120,15 @@
                         </ng-container>
                     </div>
                 </div>
+
+                <section *ngIf="isAdmin && class.participents" class="clubMemberForm">
+                    <p>שליחת הודעה למשתתפים</p>
+                    <div class="message-textarea">
+                        <textarea placeholder="הודעה" [formControl]="message"></textarea>
+                    </div>
+                
+                    <button (click)="sendMessageToClass(class, message.value)" class="submit-btn" mat-raised-button color="primary">שלח</button>
+                </section>
             </div>
         </div>
     </div>

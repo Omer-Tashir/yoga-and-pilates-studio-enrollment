@@ -12,6 +12,7 @@ import { Admin } from '../model/admin';
 
 import * as moment from 'moment/moment';
 import { Teacher } from '../model/teacher';
+import { Message } from '../model/message';
 
 @Injectable({
   providedIn: 'root',
@@ -29,7 +30,8 @@ export class DatabaseService {
       this.getTeachers().pipe(first()),
       this.getAuditoriums().pipe(first()),
       this.getClasses().pipe(first()),
-      this.getClubMembers().pipe(first())
+      this.getClubMembers().pipe(first()),
+      this.getMessages().pipe(first())
     ]).pipe(
       map(results => !!results)
     );
@@ -139,6 +141,21 @@ export class DatabaseService {
     }
   }
 
+  private getMessages(): Observable<Message[]> {
+    if (!this.SessionStorageService.getItem('messages')) {
+      return this.db.collection(`messages`).get().pipe(
+        map(messages => messages.docs.map(doc => {
+          return <Message>doc.data();
+        })),
+        tap(messages => this.SessionStorageService.setItem('messages', JSON.stringify(messages))),
+        catchError(err => of([])),
+      );
+    }
+    else {
+      return of(JSON.parse(this.SessionStorageService.getItem('messages')));
+    }
+  }
+
   createClass(c: Class): Observable<string> {
     const uid = this.db.createId();
     c.uid = uid;
@@ -197,6 +214,34 @@ export class DatabaseService {
       this.SessionStorageService.setItem('club-members', JSON.stringify(clubMembers));
     })).pipe(
       switchMap(() => of(uid))
+    );
+  }
+
+  createMessage(msg: Message): Observable<string> {
+    const uid = this.db.createId();
+    msg.uid = uid;
+
+    return from(this.db.collection(`messages`).doc(uid).set(msg).then(() => {
+      let messages = JSON.parse(this.SessionStorageService.getItem('messages'));
+      messages.push(msg);
+
+      this.SessionStorageService.setItem('messages', JSON.stringify(messages));
+    })).pipe(
+      switchMap(() => of(uid))
+    );
+  }
+
+  removeMessage(msg: Message): Observable<string> {
+    return from(this.db.collection(`messages`).doc(msg.uid).delete().then(() => {
+      let messages = JSON.parse(this.SessionStorageService.getItem('messages'));
+      let i = messages.findIndex((m: Message) => m.uid === msg.uid);
+      if (i !== -1) {
+        messages.splice(i, 1);
+      }
+
+      this.SessionStorageService.setItem('messages', JSON.stringify(messages));
+    })).pipe(
+      switchMap(() => of(msg.uid))
     );
   }
 

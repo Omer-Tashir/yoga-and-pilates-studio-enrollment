@@ -102,3 +102,20 @@
         }
     }
 }
+
+.clubMemberForm {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-end;
+
+    textarea {
+        width: 30vw;
+        height: 50px;
+        margin-bottom: 12px;
+    }
+
+    button {
+        margin-bottom: 30px;
+    }
+}

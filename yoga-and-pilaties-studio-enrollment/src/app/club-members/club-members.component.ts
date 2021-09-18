@@ -1,16 +1,18 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { merge, Observable, of } from 'rxjs';
+import { forkJoin, merge, Observable, of } from 'rxjs';
 
 import { DatabaseService } from '../core/database.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { map, startWith, switchMap } from 'rxjs/operators';
+import { first, map, startWith, switchMap } from 'rxjs/operators';
 import { AlertService } from '../core/alerts/alert.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 import { ClubMember, MembershipType } from '../model/club-member';
 import { SessionStorageService } from '../core/session-storage-service';
+import { Message } from '../model/message';
+import { MessageService } from '../core/message.service';
 
 @Component({
   selector: 'app-club-members',
@@ -20,6 +22,7 @@ import { SessionStorageService } from '../core/session-storage-service';
 export class ClubMembersComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['name', 'email', 'membershipType', 'memberSince'];
   form: FormGroup = new FormGroup({});
+  clubMemberForm: FormGroup = new FormGroup({});
 
   auth$!: Observable<any>;
   members!: ClubMember[];
@@ -43,7 +46,8 @@ export class ClubMembersComponent implements OnInit, AfterViewInit {
 
   constructor(
     public afAuth: AngularFireAuth,
-    private sessionStorageService: SessionStorageService, 
+    private sessionStorageService: SessionStorageService,
+    private messageService: MessageService,
     private db: DatabaseService,
     private alert: AlertService
   ) { 
@@ -96,7 +100,11 @@ export class ClubMembersComponent implements OnInit, AfterViewInit {
   };
 
   hasError = (controlName: string, errorName: string) => {
-    return this.form?.controls[controlName].hasError(errorName);
+    return this.form?.controls[controlName].hasError(errorName) && this.form.touched;
+  };
+
+  clubMemberFormHasError = (controlName: string, errorName: string) => {
+    return this.clubMemberForm?.controls[controlName].hasError(errorName) && this.clubMemberForm.touched;
   };
 
   private initDatasource(data: ClubMember[]): void {
@@ -109,6 +117,25 @@ export class ClubMembersComponent implements OnInit, AfterViewInit {
     this.sortData({ active: 'name', direction: 'asc' });
   }
 
+  sendMessageToClubMember(value: any): void {
+    let forkArr: Observable<string>[] = [];
+    if (value?.memberUid?.length && value?.message) {
+      for (let i = 0; i < value.memberUid.length; i++) {
+        forkArr.push(
+          this.messageService.sendMessageToClubMember({
+            memberUid: value.memberUid[i],
+            message: value.message
+          } as Message
+          ).pipe(first())
+        );
+      }
+
+      forkJoin(forkArr).subscribe(() => {
+        this.alert.ok('ההודעה נשלחה בהצלחה', '');
+      });
+    }
+  }
+
   ngOnInit(): void {
     this.auth$ = this.afAuth.authState;
 
@@ -117,6 +144,11 @@ export class ClubMembersComponent implements OnInit, AfterViewInit {
       email: new FormControl('', [Validators.email, Validators.required]),
       membershipType: new FormControl('', [Validators.required]),
       memberSince: new FormControl(new Date(), [Validators.required]),
+    });
+
+    this.clubMemberForm = new FormGroup({
+      memberUid: new FormControl(null, [Validators.required]),
+      message: new FormControl(null, [Validators.required]),
     });
   }
 

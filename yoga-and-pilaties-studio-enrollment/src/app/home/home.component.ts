@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { first } from 'rxjs/operators';
 
@@ -16,6 +16,11 @@ import { Admin } from '../model/admin';
 import { environment } from 'src/environments/environment';
 
 import * as moment from 'moment/moment';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Message } from '../model/message';
+import { MessageService } from '../core/message.service';
+import { FormControl } from '@angular/forms';
+import { forkJoin, Observable } from 'rxjs';
 
 declare let Email: any;
 
@@ -24,12 +29,14 @@ declare let Email: any;
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, AfterViewInit {
   calendarActiveDate: Date = new Date();
   classes!: Class[];
   dailyClasses!: Class[];
   auditoriums!: Auditorium[];
   members!: ClubMember[];
+  messages!: Message[];
+  message = new FormControl(null);
 
   admin!: Admin;
   member!: ClubMember;
@@ -41,15 +48,18 @@ export class HomeComponent implements OnInit {
   constructor(
     private db: DatabaseService,
     private sessionStorageService: SessionStorageService,
+    private messageService: MessageService,
     private dateFormatPipe: DateFormatPipe,
     private alert: AlertService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private _snackBar: MatSnackBar
   ) { 
     this.admin = JSON.parse(this.sessionStorageService.getItem('admin'));
     this.member = JSON.parse(this.sessionStorageService.getItem('member'));
     this.classes = JSON.parse(this.sessionStorageService.getItem('classes'));
     this.auditoriums = JSON.parse(this.sessionStorageService.getItem('auditoriums'));
     this.members = JSON.parse(this.sessionStorageService.getItem('club-members'));
+    this.messages = JSON.parse(this.sessionStorageService.getItem('messages'));
 
     this.isAdmin = !!this.admin;
     this.isMember = !!this.member;
@@ -118,6 +128,12 @@ export class HomeComponent implements OnInit {
       }
 
       if (isClassChanged) {
+        if (!c.participents) {
+          c.participents = [];
+        }
+        if (!c.waitingList) {
+          c.waitingList = [];
+        }
         this.db.updateClass(c).pipe(first()).subscribe(() => {
           this.classes = JSON.parse(this.sessionStorageService.getItem('classes'));
           this.dateChanged(this.calendarActiveDate);
@@ -336,15 +352,10 @@ export class HomeComponent implements OnInit {
   private sendMessageToWaitingParticipent(participent: string, c: Class): void {
     let p: ClubMember | undefined = this.members.find(m => m.uid === participent);
     if (!!p) {
-      Email.send({
-        Host : environment.smtp.server,
-        Username : environment.smtp.username,
-        Password : environment.smtp.password,
-        From : environment.smtp.username,
-        To : p.email,
-        Subject : `הודעה על שיבוץ לשיעור - הסטודיו לפילאטיס ויוגה`,
-        Body : `היי ${p.name}, אנו שמחים להודיע לך כי שובצת לשיעור ${c.type} שייערך בתאריך ${this.dateFormatPipe.transform(c.date)} בשעה ${c.hour}:00`,
-      });
+      this.messageService.sendMessageToClubMember({
+        memberUid: p.uid,
+        message: `היי ${p.name}, אנו שמחים להודיע לך כי שובצת לשיעור ${c.type} שייערך בתאריך ${this.dateFormatPipe.transform(c.date)} בשעה ${c.hour}:00`
+      } as Message).pipe(first()).subscribe();
     }
   }
 
@@ -402,7 +413,42 @@ export class HomeComponent implements OnInit {
     return this.members.filter(m => c.waitingList?.includes(m.uid));
   }
 
+  sendMessageToClass(c: Class, message: string): void {
+    let forkArr: Observable<string>[] = [];
+    if (c?.participents && message) {
+      for (let i = 0; i < c.participents.length; i++) {
+        forkArr.push(
+          this.messageService.sendMessageToClubMember({
+            memberUid: c.participents[i],
+            message
+          } as Message
+          ).pipe(first())
+        );
+      }
+
+      forkJoin(forkArr).subscribe(() => {
+        this.alert.ok('ההודעה נשלחה בהצלחה', '');
+      });
+
+      this.message.reset();
+    }
+  }
+
   ngOnInit(): void {
     this.dateChanged(new Date());
+    if (this.member && this.messages) {
+      this.messages.filter(msg => msg.memberUid === this.member.uid).forEach(m => {
+        this._snackBar.open(`${m.message}`, 'סגור', {
+          horizontalPosition: 'right',
+          verticalPosition: 'bottom',
+        });
+
+        this.messageService.removeMessage(m).pipe(first()).subscribe();
+      });
+    }
+  }
+
+  ngAfterViewInit(): void {
+    this.runAlgorithem();
   }
 }
