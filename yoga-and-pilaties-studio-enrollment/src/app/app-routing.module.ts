@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { Router, RouterModule, Routes } from '@angular/router';
 
 import { AuthService } from './auth/auth.service';
-import { isAdminGuard, isAdminOrTeacherGuard, isMemberGuard } from './auth/auth.guard';
+import { isAdminOrTeacherGuard, isMemberGuard } from './auth/auth.guard';
 import { DbResolverService } from './db.resolver.service';
 
 import { HomeComponent } from './home/home.component';

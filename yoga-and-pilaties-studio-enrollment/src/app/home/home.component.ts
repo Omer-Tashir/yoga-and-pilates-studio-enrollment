@@ -92,8 +92,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
             let betterIndex = this.dailyClasses.findIndex(i => i.uid === classInBetterAuditorium?.uid);
             
             if (currentIndex !== -1 && betterIndex !== -1) {
-              let currentParticipents = classInBetterAuditorium.participents ?? [];
-              let currentWaitingList = classInBetterAuditorium.waitingList ?? [];
+              let currentParticipents = classInBetterAuditorium.participents;
+              let currentWaitingList = classInBetterAuditorium.waitingList;
 
               // check if need to move from participents to waiting list
               while (currentParticipents?.length > 0 && auditorium?.capacity < currentParticipents?.length) {
