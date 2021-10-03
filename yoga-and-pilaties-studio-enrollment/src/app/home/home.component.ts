@@ -82,7 +82,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
         // auditorium arrangement
         let capacity = auditorium.capacity;
         let totalParticipents: number = (c.participents?.length ?? 0) + (c.waitingList?.length ?? 0);
-        let betterAuditorium = allAuditoriums.find(a => ((a.capacity === capacity + 3) && (a.uid !== auditorium?.uid) && !!this.getClassInBetterAuditorium(c, a)));
+        let betterAuditorium = allAuditoriums.find(a => ((a.capacity === capacity + 5) && (a.uid !== auditorium?.uid) && !!this.getClassInBetterAuditorium(c, a)));
 
         if ((c?.waitingList?.length > 0) && (!!betterAuditorium)) {
           // find if the better auditorium is available
