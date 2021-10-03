@@ -82,18 +82,19 @@ export class HomeComponent implements OnInit, AfterViewInit {
         // auditorium arrangement
         let capacity = auditorium.capacity;
         let totalParticipents: number = (c.participents?.length ?? 0) + (c.waitingList?.length ?? 0);
-        let betterAuditorium = allAuditoriums.find(a => a.capacity > capacity);
+        let betterAuditorium = allAuditoriums.find(a => ((a.capacity === capacity + 3) && (a.uid !== auditorium?.uid) && !!this.getClassInBetterAuditorium(c, a)));
 
         if ((c?.waitingList?.length > 0) && (!!betterAuditorium)) {
           // find if the better auditorium is available
           let classInBetterAuditorium = this.dailyClasses.find(cls => ((cls.uid !== c.uid) && (cls.auditorium === betterAuditorium?.uid) && (moment(cls.date).isSame(c.date, 'day')) && (cls.hour === c.hour) && (!cls.waitingList || cls.waitingList.length === 0)));
+
           if (!!classInBetterAuditorium && ((classInBetterAuditorium.participents?.length ?? 0) + (classInBetterAuditorium.waitingList?.length ?? 0) < totalParticipents)) {
             let currentIndex = this.dailyClasses.findIndex(i => i.uid === c?.uid);
             let betterIndex = this.dailyClasses.findIndex(i => i.uid === classInBetterAuditorium?.uid);
             
             if (currentIndex !== -1 && betterIndex !== -1) {
-              let currentParticipents = classInBetterAuditorium.participents;
-              let currentWaitingList = classInBetterAuditorium.waitingList;
+              let currentParticipents = classInBetterAuditorium.participents ?? [];
+              let currentWaitingList = classInBetterAuditorium.waitingList ?? [];
 
               // check if need to move from participents to waiting list
               while (currentParticipents?.length > 0 && auditorium?.capacity < currentParticipents?.length) {
@@ -103,10 +104,10 @@ export class HomeComponent implements OnInit, AfterViewInit {
                 }
               }
 
-              this.dailyClasses[betterIndex].participents = this.dailyClasses[currentIndex].participents;
-              this.dailyClasses[betterIndex].waitingList = this.dailyClasses[currentIndex].waitingList;
-              this.dailyClasses[currentIndex].participents = currentParticipents;
-              this.dailyClasses[currentIndex].waitingList = currentWaitingList;
+              this.dailyClasses[betterIndex].participents = this.dailyClasses[currentIndex].participents ?? [];
+              this.dailyClasses[betterIndex].waitingList = this.dailyClasses[currentIndex].waitingList ?? [];
+              this.dailyClasses[currentIndex].participents = currentParticipents ?? [];
+              this.dailyClasses[currentIndex].waitingList = currentWaitingList ?? [];
 
               isClassChanged = true;
             }
@@ -146,6 +147,10 @@ export class HomeComponent implements OnInit, AfterViewInit {
     });
 
     this.isLoading = false;
+  }
+
+  private getClassInBetterAuditorium(c: Class, auditorium: Auditorium): Class | undefined {
+    return this.dailyClasses.find(cls => ((cls.uid !== c.uid) && (cls.auditorium === auditorium?.uid) && (moment(cls.date).isSame(c.date, 'day')) && (cls.hour === c.hour) && (!cls.waitingList || cls.waitingList.length === 0)));
   }
 
   addClass() {
